@@ -1,22 +1,31 @@
+from PyPDF2 import PdfFileReader, PdfFileMerger
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import nltk
 import numpy as np
 
 def processFiles(document):
-	raw = open(document).read()
+	#raw = open(document).read()
+	pdfFileObj = open(document, 'rb')
+	pdfReader = PdfFileReader(pdfFileObj)
+	pageObj = pdfReader.getPage(0)
+	raw = pageObj.extractText()
 	tokens = word_tokenize(raw)
 	words = [w.lower() for w in tokens]
 
 	porter = nltk.PorterStemmer()
 	stemmed_tokens = [porter.stem(t) for t in words]
-
+	print stemmed_tokens
 	stop_words = set(stopwords.words('english'))
+	print stop_words
+	print "-----------------------------------------------------------------------------------"
 	filtered_tokens = [w for w in stemmed_tokens if not w in stop_words]
+	print filtered_tokens
 
 	count = nltk.defaultdict(int)
 	for word in filtered_tokens:
 		count[word]+=1
+		print word
 	return count
 
 
@@ -45,11 +54,14 @@ def findSimilarity(dict1, dict2):
 		vector1[i]=dict1.get(key,0)
 		vector2[i] = dict2.get(key,0)
 
+	print vector1
+	print vector2
+
 	return cos_sim(vector1,vector2)
 
 
-dict1 = processFiles("a1.txt")
-dict2 = processFiles("b1.txt")
+dict1 = processFiles("pan.pdf")
+dict2 = processFiles("August.pdf")
 print findSimilarity(dict1, dict2)
 
 
